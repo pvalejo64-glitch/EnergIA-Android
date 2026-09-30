@@ -1,1 +1,1 @@
-{"name":"energia-server","private":true,"type":"module","scripts":{"start":"node --env-file=.env index.mjs"}}
+{"name":"energia-server","private":true,"type":"module","scripts":{"start":"node index.mjs"}}
