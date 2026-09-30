@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "EnergIA",
+    "slug": "energia-buena-energia",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.buenaenergia.energia",
+      "edgeToEdgeEnabled": true
+    },
+    "ios": {
+      "bundleIdentifier": "com.buenaenergia.energia",
+      "supportsTablet": true
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
