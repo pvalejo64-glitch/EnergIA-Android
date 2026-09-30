@@ -1,0 +1,2 @@
+# EnergIA-Android
+.gitignore
