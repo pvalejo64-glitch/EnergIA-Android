@@ -65,7 +65,8 @@
   <button data-go="settings" onclick="go('settings')"><span class="nicon">⚙</span>Ajustes</button>
 </div></nav>
 <script>
-const state={messages:[],apiUrl:localStorage.getItem('energia_api')||''};
+const DEFAULT_API_URL='https://energia-api-nuevo.onrender.com';
+const state={messages:[],apiUrl:localStorage.getItem('energia_api')||DEFAULT_API_URL};
 const $=id=>document.getElementById(id);
 $('apiUrl').value=state.apiUrl; updateStatus();
 function updateStatus(){ $('status').textContent=state.apiUrl?'Servidor configurado':'Modo local'; }
