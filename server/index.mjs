@@ -1,7 +1,7 @@
 import http from 'node:http';
 
 const PORT = Number(process.env.PORT || 8787);
-const MODEL = process.env.OPENAI_MODEL || 'gpt-5.6-luna';
+const MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
 const API_KEY = process.env.OPENAI_API_KEY;
 const SYSTEM_PROMPT = `Eres EnergIA, asistente de Buena Energía Marketing Digital. Ayudas a crear contenido, ideas, guiones para Reels, respuestas a clientes y estrategias sencillas. Responde principalmente en español, con tono cercano, profesional y natural. No inventes precios, descuentos, testimonios ni resultados garantizados. Cuando falte información comercial esencial, dilo con claridad.`;
 
