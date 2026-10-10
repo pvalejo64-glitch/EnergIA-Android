@@ -69,7 +69,27 @@ const DEFAULT_API_URL='https://energia-api-nuevo.onrender.com';
 const state={messages:[],apiUrl:localStorage.getItem('energia_api')||DEFAULT_API_URL};
 const $=id=>document.getElementById(id);
 $('apiUrl').value=state.apiUrl; updateStatus();
-function updateStatus(){ $('status').textContent=state.apiUrl?'Servidor configurado':'Modo local'; }
+function updateStatus(label){ $('status').textContent=label || (state.apiUrl?'Comprobando conexión…':'Modo local'); }
+async function checkConnection(silent=true){
+  if(!state.apiUrl){updateStatus('Modo local');return false;}
+  if(!navigator.onLine){updateStatus('Sin internet');if(!silent)$('testResult').textContent='El teléfono indica que no tiene conexión a internet. Activa Wi‑Fi o datos móviles.';return false;}
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);
+  try{
+    const r=await fetch(state.apiUrl.replace(/\/$/,'')+'/health',{method:'GET',cache:'no-store',signal:controller.signal});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error('Servidor HTTP '+r.status);
+    updateStatus('Conectado');
+    if(!silent)$('testResult').innerHTML='<span class="success">✓ Conexión con el servidor correcta.</span> '+(d.apiKeyConfigured===false?' El servidor no tiene configurada OPENAI_API_KEY; hay que agregarla en Render.':'El servidor respondió correctamente.');
+    return true;
+  }catch(e){
+    updateStatus('Sin conexión');
+    if(!silent)$('testResult').innerHTML='<span class="warn">No se pudo conectar con el servidor.</span> '+(e.name==='AbortError'?'Tiempo de espera agotado.':e.message||'Revisa internet, Wi‑Fi o datos móviles.');
+    return false;
+  }finally{clearTimeout(timer);}
+}
+window.addEventListener('online',()=>checkConnection());
+window.addEventListener('offline',()=>updateStatus('Sin internet'));
+setTimeout(()=>checkConnection(),700);
 function go(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.go===id)); if(id==='chat') setTimeout(()=>$('chatInput').focus(),150)}
 function quick(text){go('chat');$('chatInput').value=text;sendMessage()}
 function addMessage(role,text){const d=document.createElement('div');d.className='msg '+(role==='user'?'user':'bot');d.textContent=text;$('messages').appendChild(d);$('messages').scrollTop=$('messages').scrollHeight;state.messages.push({role,content:text});}
@@ -83,7 +103,7 @@ async function askAI(text){
 async function sendMessage(){const input=$('chatInput');const text=input.value.trim();if(!text)return;input.value='';addMessage('user',text);$('sendBtn').disabled=true;$('typing').textContent='Buena Energía está pensando…';try{const reply=await askAI(text);addMessage('assistant',reply)}catch(e){addMessage('assistant','No pude conectar con el servidor. Revisa Ajustes.\n\nDetalle: '+e.message)}finally{$('typing').textContent='';$('sendBtn').disabled=false}}
 async function createContent(){const type=$('contentType').value.trim()||'contenido';const biz=$('business').value.trim()||'un negocio';const goal=$('goal').value.trim()||'atraer clientes';const prompt=`Crea un ${type} para ${biz}. Objetivo: ${goal}. Incluye gancho, estructura, texto/copy y llamada a la acción. Que suene natural y con buena energía.`;const box=$('creatorResult');box.style.display='block';box.textContent='Creando…';try{const reply=await askAI(prompt);box.textContent=reply}catch(e){box.textContent='No pude conectar: '+e.message}}
 function saveSettings(){state.apiUrl=$('apiUrl').value.trim().replace(/\/$/,'');localStorage.setItem('energia_api',state.apiUrl);updateStatus();$('testResult').innerHTML=state.apiUrl?'<span class="success">Servidor guardado.</span>':'<span class="warn">Modo local activado.</span>'}
-async function testServer(){saveSettings();if(!state.apiUrl)return;const el=$('testResult');el.textContent='Probando conexión…';try{const r=await fetch(state.apiUrl+'/health');const d=await r.json();if(!r.ok)throw new Error('HTTP '+r.status);el.innerHTML='<span class="success">✓ Conectado.</span> Servicio: '+(d.service||'Buena Energía')}catch(e){el.innerHTML='<span class="warn">No se pudo conectar.</span> '+e.message}}
+async function testServer(){saveSettings();if(!state.apiUrl)return;const el=$('testResult');el.textContent='Probando conexión…';await checkConnection(false);}
 $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
 </script>
 </body>
